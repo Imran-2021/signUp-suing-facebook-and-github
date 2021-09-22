@@ -1,23 +1,56 @@
-import logo from './logo.svg';
+import React, { useReducer, useState } from 'react';
 import './App.css';
+import { getAuth, signInWithPopup, FacebookAuthProvider } from "firebase/auth";
+import { initializeApp } from 'firebase/app';
+import firebaseConfig from './Firebase.Config';
+initializeApp(firebaseConfig)
 
 function App() {
+  const [user,setUser]=useState({
+    isSignIn:false,
+    email:"",
+    photoURL:"",
+    displayName:"",
+    errorMessage:""
+
+  }) ;
+  const provider = new FacebookAuthProvider();
+  const handleSignIn=()=>{
+    
+    const auth = getAuth();
+signInWithPopup(auth, provider)
+  .then((result) => {
+    // The signed-in user info.
+    const user = result.user;
+    const {email,displayName,photoURL} = user?.providerData[0]
+    setUser({
+      isSignIn:true,
+      email:email,
+      photoURL:photoURL,
+      displayName:displayName,
+      errorMessage:""
+  
+    })
+  })
+  .catch((error) => {
+    // Handle Errors here.
+    const errorMessage = error.message;
+    setUser(user.errorMessage=errorMessage)
+    // ...
+  });
+  }
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
+    <div>
+      <p>FaceBook and Github Login </p>
+      <button onClick={handleSignIn}>Signin Using FaceBook</button>
+      <br /><br /><br />
+      <img src={user.photoURL} alt="" />
+      <p>{user.displayName}</p>
+      <p>{user.email}</p>
+     {
+       user.errorMessage &&<p>{user.errorMessage}</p>
+       
+     } 
     </div>
   );
 }
